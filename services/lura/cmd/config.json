@@ -1,0 +1,65 @@
+{
+    "version": 3,
+    "name": "My lovely gateway",
+    "timeout": "10s",
+    "cache_ttl": "3600s",
+    "plugin": {
+        "pattern": ".so",
+        "folder": "/home/pedrocondeco/stackit/lura-plugin/plugins/"
+    },
+    "endpoints": [
+        {
+            "endpoint": "/hello-stackit",
+            "output_encoding": "no-op",
+            "method": "GET",
+            "backend": [
+                {
+                    "host": [
+                        "https://www.stackit.de/"
+                    ],
+                    "encoding": "no-op",
+                    "url_pattern": "/"
+                }
+            ],
+            "timeout": "1000s"
+        },
+        {
+            "endpoint": "/open",
+            "output_encoding": "no-op",
+            "method": "GET",
+            "backend": [
+                {
+                    "host": [
+                        "http://localhost:50051"
+                    ],
+                    "encoding": "no-op",
+                    "url_pattern": "/open",
+                    "extra_config": {
+                        "plugin/req-resp-modifier": {
+                            "name": [
+                                "krakend-debugger-request",
+                                "krakend-debugger-response"
+                            ]
+                        }
+                    }
+                }
+            ],
+            "timeout": "1000s"
+        },
+        {
+            "endpoint": "/secured",
+            "output_encoding": "no-op",
+            "method": "GET",
+            "backend": [
+                {
+                    "host": [
+                        "http://localhost:50051"
+                    ],
+                    "encoding": "no-op",
+                    "url_pattern": "/secure"
+                }
+            ],
+            "timeout": "1000s"
+        }
+    ]
+}
