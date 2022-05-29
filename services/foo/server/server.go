@@ -12,7 +12,7 @@ func NewServer() Server {
 }
 
 func (s Server) Open(w http.ResponseWriter, req *http.Request) {
-	fmt.Fprintf(w, "Unsecure foo\n")
+	fmt.Fprintf(w, "Insecure foo\n")
 	w.WriteHeader(http.StatusOK)
 
 }
@@ -23,11 +23,11 @@ func (s Server) Secured(w http.ResponseWriter, req *http.Request) {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
-	if val[0] != "top-secret" {
+	if val[0] != "password123!" {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
-	fmt.Fprintf(w, "Secured foo!!!\n")
+	fmt.Fprintf(w, "Secure foo!!!\n")
 	w.WriteHeader(http.StatusOK)
 }
 

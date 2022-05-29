@@ -18,12 +18,12 @@ func NewServer() Server {
 
 func (s Server) StartOne() error {
 	lura := NewLuraInstance()
-	ctxCancel, err := lura.Spawn(8080)
+	ctxCancel, err := lura.Spawn(8001)
 	if err != nil {
 		return err
 	}
 
-	s.instances[8080] = ctxCancel
+	s.instances[8001] = ctxCancel
 	return nil
 }
 
@@ -57,5 +57,5 @@ func (s Server) Run() error {
 	http.HandleFunc("/start", s.StartLura)
 	http.HandleFunc("/stop", s.StopLura)
 
-	return http.ListenAndServe(":8083", nil)
+	return http.ListenAndServe(":8089", nil)
 }

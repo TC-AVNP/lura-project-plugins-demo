@@ -3,28 +3,23 @@
     "name": "My lovely gateway",
     "timeout": "10s",
     "cache_ttl": "3600s",
+    "debug": true,
+    "port": 8001,
     "plugin": {
         "pattern": ".so",
-        "folder": "/home/pedrocondeco/stackit/lura-plugin/plugins/"
+        "folder": "/home/pedrocondeco/stackit/lura-plugin/poc/plugins/shared-objects"
+    },
+    "extra_config": {
+        "github_com/devopsfaith/krakend-gologging": {
+            "level": "ERROR",
+            "prefix": "[KRAKEND]",
+            "syslog": false,
+            "stdout": true
+        }
     },
     "endpoints": [
         {
-            "endpoint": "/hello-stackit",
-            "output_encoding": "no-op",
-            "method": "GET",
-            "backend": [
-                {
-                    "host": [
-                        "https://www.stackit.de/"
-                    ],
-                    "encoding": "no-op",
-                    "url_pattern": "/"
-                }
-            ],
-            "timeout": "1000s"
-        },
-        {
-            "endpoint": "/open",
+            "endpoint": "/bar",
             "output_encoding": "no-op",
             "method": "GET",
             "backend": [
@@ -35,19 +30,22 @@
                     "encoding": "no-op",
                     "url_pattern": "/open",
                     "extra_config": {
-                        "plugin/req-resp-modifier": {
+                        "github.com/devopsfaith/krakend/proxy/plugin": {
                             "name": [
-                                "krakend-debugger-request",
-                                "krakend-debugger-response"
-                            ]
+                                "request-example-hello",
+                                "request-example-dynamic",
+                                "request-example-goodbye"
+                            ],
+                            "request-example-dynamic": {
+                                "foo": "I'm such a random little value"
+                            }
                         }
                     }
                 }
-            ],
-            "timeout": "1000s"
+            ]
         },
         {
-            "endpoint": "/secured",
+            "endpoint": "/foo",
             "output_encoding": "no-op",
             "method": "GET",
             "backend": [
@@ -56,10 +54,25 @@
                         "http://localhost:50051"
                     ],
                     "encoding": "no-op",
-                    "url_pattern": "/secure"
+                    "url_pattern": "/secured",
+                    "extra_config": {
+                        "github.com/devopsfaith/krakend/proxy/plugin": {
+                            "name": [
+                                "request-example-hello",
+                                "request-example-dynamic",
+                                "request-example-goodbye",
+                                "inject-header-example-top-secret"
+                            ],
+                            "inject-header-example-top-secret": {
+                                "authorization": "password123!"
+                            },
+                            "request-example-dynamic": {
+                                "foo": "I'm such a random little value"
+                            }
+                        }
+                    }
                 }
-            ],
-            "timeout": "1000s"
+            ]
         }
     ]
 }

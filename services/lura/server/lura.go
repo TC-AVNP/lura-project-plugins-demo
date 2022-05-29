@@ -2,14 +2,14 @@ package server
 
 import (
 	"context"
+	"net/http"
 	"os"
 
-	gonicgin "github.com/gin-gonic/gin"
-	"github.com/luraproject/lura/config"
-	"github.com/luraproject/lura/logging"
-	"github.com/luraproject/lura/proxy"
-	"github.com/luraproject/lura/router"
-	"github.com/luraproject/lura/router/gin"
+	"github.com/luraproject/lura/v2/config"
+	"github.com/luraproject/lura/v2/logging"
+	"github.com/luraproject/lura/v2/proxy"
+	"github.com/luraproject/lura/v2/router/gin"
+	server "github.com/luraproject/lura/v2/transport/http/server/plugin"
 )
 
 type LuraInstance struct {
@@ -27,22 +27,15 @@ func (l *LuraInstance) Spawn(port int) (context.CancelFunc, error) {
 		parser := config.NewParser()
 		serviceConfig, _ := parser.Parse(configFile)
 
-		serviceConfig.Port = port
-		serviceConfig.Debug = true
+		logger, _ := logging.NewLogger("logLevel", os.Stdout, "[LURA]")
 
-		luraLogger, _ := logging.NewLogger(gonicgin.DebugMode, os.Stdout, "[LURA]")
-		proxyFactory := proxy.DefaultFactory(luraLogger)
+		pluginLoader := pluginLoader{}
+		pluginLoader.Load(serviceConfig.Plugin.Folder, serviceConfig.Plugin.Pattern, logger)
 
-		routerFactory := gin.NewFactory(gin.Config{
-			Engine:         gonicgin.Default(),
-			Middlewares:    []gonicgin.HandlerFunc{},
-			ProxyFactory:   proxyFactory,
-			HandlerFactory: gin.EndpointHandler,
-			Logger:         luraLogger,
-			RunServer:      router.RunServer,
-		}).NewWithContext(spawnCtx)
+		routerFactory := gin.DefaultFactory(proxy.DefaultFactory(logger), logger)
 
-		routerFactory.Run(serviceConfig)
+		routerFactory.New().Run(serviceConfig)
+
 	}(spawnCtx)
 
 	return cancel, nil
@@ -50,4 +43,10 @@ func (l *LuraInstance) Spawn(port int) (context.CancelFunc, error) {
 
 func (l LuraInstance) Stop() error {
 	return nil
+}
+
+type RunServer func(context.Context, config.ServiceConfig, http.Handler) error
+
+func newRunServer(l logging.Logger, next gin.RunServerFunc) RunServer {
+	return RunServer(server.RunServer(next))
 }
