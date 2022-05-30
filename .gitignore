@@ -1,3 +1,4 @@
 .vscode/settings.json
 services/lura/cmd/lura
 plugins/shared-objects/*.so
+.vscode/launch.json

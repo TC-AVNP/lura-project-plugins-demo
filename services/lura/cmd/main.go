@@ -15,11 +15,10 @@ func main() {
 }
 
 func run() error {
-	svc := server.NewServer()
-
-	if err := svc.StartOne(); err != nil {
+	err := server.NewLuraInstance().Start()
+	if err != nil {
 		return err
 	}
 
-	return svc.Run()
+	return nil
 }

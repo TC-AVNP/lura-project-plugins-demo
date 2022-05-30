@@ -1,61 +1,38 @@
 package server
 
 import (
-	"context"
-	"net/http"
-	"strconv"
+	"os"
+
+	"github.com/luraproject/lura/v2/config"
+	"github.com/luraproject/lura/v2/logging"
+	"github.com/luraproject/lura/v2/proxy"
+	"github.com/luraproject/lura/v2/router/gin"
 )
 
-type Server struct {
-	instances map[int]context.CancelFunc
+type LuraInstance struct {
 }
 
-func NewServer() Server {
-	return Server{
-		instances: make(map[int]context.CancelFunc),
-	}
+func NewLuraInstance() *LuraInstance {
+	return &LuraInstance{}
 }
 
-func (s Server) StartOne() error {
-	lura := NewLuraInstance()
-	ctxCancel, err := lura.Spawn(8001)
-	if err != nil {
-		return err
-	}
+func (l *LuraInstance) Start() error {
+	go func() {
+		configFile := "config.json"
 
-	s.instances[8001] = ctxCancel
+		parser := config.NewParser()
+		serviceConfig, _ := parser.Parse(configFile)
+
+		logger, _ := logging.NewLogger("logLevel", os.Stdout, "[LURA]")
+
+		pluginLoader := pluginLoader{}
+		pluginLoader.Load(serviceConfig.Plugin.Folder, serviceConfig.Plugin.Pattern, logger)
+
+		routerFactory := gin.DefaultFactory(proxy.DefaultFactory(logger), logger)
+
+		routerFactory.New().Run(serviceConfig)
+
+	}()
+
 	return nil
-}
-
-func (s Server) StartLura(w http.ResponseWriter, req *http.Request) {
-	val, ok := req.URL.Query()["port"]
-	if !ok {
-		w.WriteHeader(http.StatusInternalServerError)
-	}
-	port, _ := strconv.Atoi(val[0])
-	lura := NewLuraInstance()
-	ctxCancel, err := lura.Spawn(port)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-	}
-	s.instances[port] = ctxCancel
-	w.WriteHeader(http.StatusOK)
-}
-
-func (s Server) StopLura(w http.ResponseWriter, req *http.Request) {
-	val, ok := req.URL.Query()["port"]
-	if !ok {
-		w.WriteHeader(http.StatusInternalServerError)
-	}
-	port, _ := strconv.Atoi(val[0])
-
-	s.instances[port]()
-	w.WriteHeader(http.StatusOK)
-}
-
-func (s Server) Run() error {
-	http.HandleFunc("/start", s.StartLura)
-	http.HandleFunc("/stop", s.StopLura)
-
-	return http.ListenAndServe(":8089", nil)
 }
