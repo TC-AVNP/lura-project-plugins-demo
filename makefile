@@ -14,7 +14,10 @@ dev:
 build-lura:
 	@go build -o services/lura/cmd/lura services/lura/cmd/main.go
 
-build-all: build-plugins build-lura
+build-foo:
+	@go build -o services/foo/cmd/foo services/foo/cmd/main.go
+
+build-all: build-plugins build-lura build-foo
 
 run-lura: build-all
 	@cd services/lura/cmd/ && ./lura
