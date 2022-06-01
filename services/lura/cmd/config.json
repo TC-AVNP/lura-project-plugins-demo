@@ -7,7 +7,7 @@
     "port": 8001,
     "plugin": {
         "pattern": ".so",
-        "folder": "/home/pedrocondeco/stackit/lura-plugin/poc/plugins/shared-objects"
+        "folder": "../../../plugins/shared-objects"
     },
     "extra_config": {
         "github_com/devopsfaith/krakend-gologging": {
@@ -64,7 +64,7 @@
                                 "inject-header-example-top-secret"
                             ],
                             "inject-header-example-top-secret": {
-                                "authorization": "password123!"
+                                "authorization": "password123"
                             },
                             "request-example-dynamic": {
                                 "foo": "I'm such a random little value"

@@ -52,10 +52,6 @@ func (r registerer) hello(
 ) func(interface{}) (interface{}, error) {
 	fmt.Println("[HANDLER INJECTION]: hello")
 	return func(input interface{}) (interface{}, error) {
-		req := input.(RequestWrapper)
-		headersRef := req.Headers()
-		headersRef["Authorization"] = []string{"top-secret"}
-
 		fmt.Println("Hello injection!")
 		return input, nil
 	}

@@ -17,22 +17,19 @@ func NewLuraInstance() *LuraInstance {
 }
 
 func (l *LuraInstance) Start() error {
-	go func() {
-		configFile := "config.json"
+	configFile := "config.json"
 
-		parser := config.NewParser()
-		serviceConfig, _ := parser.Parse(configFile)
+	parser := config.NewParser()
+	serviceConfig, _ := parser.Parse(configFile)
 
-		logger, _ := logging.NewLogger("logLevel", os.Stdout, "[LURA]")
+	logger, _ := logging.NewLogger("logLevel", os.Stdout, "[LURA]")
 
-		pluginLoader := pluginLoader{}
-		pluginLoader.Load(serviceConfig.Plugin.Folder, serviceConfig.Plugin.Pattern, logger)
+	pluginLoader := pluginLoader{}
+	pluginLoader.Load(serviceConfig.Plugin.Folder, serviceConfig.Plugin.Pattern, logger)
 
-		routerFactory := gin.DefaultFactory(proxy.DefaultFactory(logger), logger)
+	routerFactory := gin.DefaultFactory(proxy.DefaultFactory(logger), logger)
 
-		routerFactory.New().Run(serviceConfig)
-
-	}()
+	routerFactory.New().Run(serviceConfig)
 
 	return nil
 }
